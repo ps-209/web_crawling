@@ -3,7 +3,7 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.edge.options import Options
 import time, os, requests
 
-def search_start():
+def search_start(): #메인
     keyword = input("이미지의 이름 : ")
     max = int(input("이미지의 개수 : "))
     folder = keyword + '_image'
@@ -15,7 +15,9 @@ def check_folder(folder_name):
         os.makedirs(folder_name)
 
 def image_search(keyword,max,folder):
-    failed = []
+    failed = [] #실패한 목록들 번호 리스트
+
+    #브라우저 설정
     bw_options = Options()
     #options.add_argument('headless')
     bw_options.add_argument('--mute-audio')
@@ -55,6 +57,8 @@ def image_search(keyword,max,folder):
                     print("Pass {} for time out".format(i))
                     break
         
+
+        #이미지 다운로드 시도
         try:
             download_image(ImageURL,folder,i)
             #print("Download success #{}".format(i))
@@ -64,7 +68,7 @@ def image_search(keyword,max,folder):
     
     print("total {} / failed {}".format(max,failed[:-1]))
 
-#이미지 다운로드
+#이미지 다운로더
 def download_image(url,folder,num):
     re = requests.get(url)
     if(re.status_code == 200):
