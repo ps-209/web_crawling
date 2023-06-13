@@ -5,6 +5,7 @@ for summer project
 
 1. 이미지 크롤러 구현
 2. 텍스트 크롤러 구현
-  - GPT API?
-  - 구글 상위 5개 사이트에서 텍스트 추출?
+  - wikipedia api사용 > 비용 0, 속도 ++, 정보량 +++
+  - Chat GPT api사용 > 비용 ++, 속도 +, 정보량(최신) --
+  - Google search + Chat GPT로 요약 > 비용 ++++, 속도 ---, 정보량 ++
 4. UI로 접근 가능하게 구현
