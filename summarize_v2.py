@@ -3,6 +3,19 @@ from konlpy.tag import Okt
 from sklearn.feature_extraction.text import TfidfVectorizer
 import numpy as np
 import re
+import nltk
+
+eng_words = []
+kor_words = []
+#한국어 리스트 설정
+def wording():
+    with open("ko_word.txt", 'r', encoding='UTF-8') as f:
+        for line in f:
+            kor_words.append(line.strip())
+        
+    with open("eng_word.txt", 'r', encoding='UTF-8') as f:
+        for line in f:
+            eng_words.append(line.strip())
 
 #문장 정규화
 def regular(text):
@@ -11,34 +24,45 @@ def regular(text):
     return sentence
 
 #문장 짧은 것들 통합
-def integrated(original):
-    sentences = Kkma().sentences(original)
+def integrated(language,original):
+    sentences = []
+    if(language == 'en'):
+        #nltk.download('punkt') 필요
+        token = nltk.data.load('tokenizers/punkt/english.pickle')
+        sentences = token.tokenize(original)
+
+    elif(language == 'ko'):
+        sentences = Kkma().sentences(original)
+    
     for i in range(len(sentences)):
-        if(len(sentences[i]) <= 10 and i > 0):
+        if(len(sentences[i]) <= 10):
             sentences[i-1] += (' ' + sentences[i])
             sentences[i] = ''
-    
+
     return sentences
 
 #통합된 문장 명사화
 def nounization(language,integrated_sentence):
     noun_sentence = []
-    if(language == 'en'):
+    if language == 'en':
         stop_words = eng_words
-        for i in integrated_sentence:
-            if(i != ''):
-                noun_sentence.append(' '.join([n for n in Okt().nouns(str(i)) if n not in stop_words and len(n) > 1]))
+        st = nltk.stem.SnowballStemmer('english')
+        #영어 불용어 제거
+        n1 = [w for w in integrated_sentence if not w in stop_words]
+        for i in range(len(n1)):
+            if i != '':
+                noun_sentence.append(n1[i])
         
-        return noun_sentence
-    elif(language == 'ko'):
+        
+    elif language == 'ko':
         stop_words = kor_words
         for i in integrated_sentence:
-            if(i != ''):
+            if i != '':
                 noun_sentence.append(' '.join([n for n in Okt().nouns(str(i)) if n not in stop_words and len(n) > 1]))
-        
-        return noun_sentence
-    else:
-        return 'error'
+
+    
+    return noun_sentence
+
 
 #graph는 랭킹부여할 기반 그래프, point는 비율
 def ranking(graph,point):
@@ -59,20 +83,27 @@ def ranking(graph,point):
 
 #메인코드
 def summarize_sentence(language,original,point,number):
-    wording()
     
+    wording()
+    # try:
+    #     nltk.download('punkt')
+    # except:
+    #     pass
     original = regular(original)
-    integrated_text = integrated(original)
+    integrated_text = integrated(language,original)
     noun_text = nounization(language,integrated_text)
-
+    
     #그래프 구성
+    #print(noun_text)
+    
     T_matrix = TfidfVectorizer().fit_transform(noun_text).toarray()
     graph_text = np.dot(T_matrix, T_matrix.T)
+    
 
     #문장 관련순으로 정렬
     ranked_text = ranking(graph_text,point)
     sorted_rank = sorted(ranked_text, key=lambda k: ranked_text[k], reverse=True)
-
+    
     total = ''
     index = []
     summary = []
@@ -87,17 +118,4 @@ def summarize_sentence(language,original,point,number):
         total += str(t) + '\n' #한 줄씩 다음줄로
     
     return total
-
-
-eng_words = []
-kor_words = []
-#한국어 리스트 설정
-def wording():
-    with open("ko_word.txt", 'r', encoding='utf-8') as f:
-        for line in f:
-            kor_words.append(line.strip())
-
-    with open("eng_word.txt", 'r', encoding='utf-8') as f:
-        for line in f:
-            eng_words.append(line.strip())
 
