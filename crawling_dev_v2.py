@@ -1,5 +1,6 @@
 import requests, re, os
 from bs4 import BeautifulSoup
+from newspaper import Article
 from summarize_v2 import summarize_sentence
 
 def t_crawling(link): #링크 설정시 페이지 전체 내용 크롤링
@@ -9,6 +10,15 @@ def t_crawling(link): #링크 설정시 페이지 전체 내용 크롤링
     try:
         text = t_soup.get_text()
         return text
+    except:
+        return '01'
+
+def t2_crawling(url,language): #newspaper모듈 사용
+    try:
+        article = Article(url,language)
+        article.download()
+        article.parse()
+        return article.text
     except:
         return '01'
 
@@ -54,17 +64,22 @@ def searching(key_word, number = 2):
             continue
         else:
             search_link = i.a.attrs['href'] #링크 설정
-            original_page = t_crawling(search_link)
+    
+            language = get_language(title[count])
+            original_page = t2_crawling(search_link,language)
+        
             if(original_page == '01'):
                 print('crawling error. skip this page')
                 continue
-            language = get_language(title[count])
             if(language != 'ko' and language != 'en'):
                 continue
+
             converted_page = summarize_sentence(language, original_page, 0.85, 5)
+
             if(len(converted_page) <= 5):
                 print('error on summarization. Code : ' + converted_page)
                 continue
+
             contents.append(title[count] + ' : ' + search_link + '\n' + converted_page)
             count += 1
 
@@ -73,3 +88,9 @@ def searching(key_word, number = 2):
 word = str(input('Search for : '))
 number = int(input('How many : '))
 searching(word,number)
+
+
+#ERROR CODE
+#01  - crawling error
+
+#004 - error on vectorizing graph
