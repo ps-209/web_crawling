@@ -1,5 +1,5 @@
 # web_crawling
-for summer project
+for summer project - 구성 파츠들 업로드
 
 텍스트 검색과 이미지 저장이 가능한 웹 크롤러 만들기
 
@@ -10,4 +10,4 @@ for summer project
   - Chat GPT api사용 > 비용 ++, 속도 +, 정보량(최신) --
   - Google search + Chat GPT로 요약 > 비용 ++++, 속도 ---, 정보량 ++
   - TextRank알고리즘 사용 - 80%
-4. UI로 접근 가능하게 구현
+4. UI로 접근 가능하게 구현 - 완료
